@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>بلنصلي — إطار الصورة</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#081a39;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:24px}
+main{width:min(100%,560px)}h1{text-align:center;color:#36d0c1;margin:8px 0 4px}p{text-align:center;color:#c5d3e8;margin:0 0 20px}.panel{background:#10264c;border:1px solid #27466f;border-radius:20px;padding:18px;box-shadow:0 16px 40px #0004}
+#stage{width:100%;aspect-ratio:1;background:#061329;border-radius:14px;overflow:hidden;position:relative;touch-action:none}canvas{width:100%;height:100%;display:block}.controls{display:grid;gap:14px;margin-top:16px}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}label{font-size:14px;color:#dbe6f6}.file{display:block;width:100%;padding:12px;border:1px solid #547197;border-radius:12px;background:#0a1c39;color:white}input[type=range]{width:100%;accent-color:#31c7bd}button{border:0;border-radius:12px;padding:13px 16px;font-weight:700;font-size:15px;cursor:pointer;background:#31c7bd;color:#06213b;flex:1}button.secondary{background:#f1bc43;color:#17223a}.tip{font-size:13px;color:#b8c9e1;text-align:center;margin-top:12px}
+</style></head>
+<body><main><h1>بلنصلي</h1><p>أضف إطار بلنصلي إلى صورتك</p><div class="panel"><div id="stage"><canvas id="canvas" width="1254" height="1254"></canvas></div><div class="controls"><label>اختر صورتك</label><input class="file" type="file" id="upload" accept="image/*"><div><label for="zoom">تكبير / تصغير الصورة</label><input id="zoom" type="range" min="0.5" max="2.5" step="0.01" value="1"></div><div class="row"><button id="download">تنزيل الصورة</button><button class="secondary" id="reset">إعادة ضبط</button></div></div><div class="tip">حرّك الصورة داخل الإطار بالسحب، ثم نزّلها وشاركها.</div></div></main>
+<script>
+const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d'),upload=document.getElementById('upload'),zoom=document.getElementById('zoom');
+const frame=new Image();frame.src='frame.png';let photo=null,scale=1,x=0,y=0,base=1,drag=false,lastX=0,lastY=0;
+function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);if(photo){let w=photo.width*base*scale,h=photo.height*base*scale;ctx.drawImage(photo,(canvas.width-w)/2+x,(canvas.height-h)/2+y,w,h);}if(frame.complete)ctx.drawImage(frame,0,0,canvas.width,canvas.height);}
+frame.onload=draw;upload.addEventListener('change',e=>{let f=e.target.files[0];if(!f)return;let im=new Image();im.onload=()=>{photo=im;base=Math.max(canvas.width/im.width,canvas.height/im.height);scale=1;x=0;y=0;zoom.value=1;draw();};im.src=URL.createObjectURL(f);});
+zoom.oninput=()=>{scale=+zoom.value;draw();};
+canvas.addEventListener('pointerdown',e=>{if(!photo)return;drag=true;canvas.setPointerCapture(e.pointerId);lastX=e.clientX;lastY=e.clientY});canvas.addEventListener('pointermove',e=>{if(!drag)return;let rect=canvas.getBoundingClientRect();x+=(e.clientX-lastX)*canvas.width/rect.width;y+=(e.clientY-lastY)*canvas.height/rect.height;lastX=e.clientX;lastY=e.clientY;draw()});canvas.addEventListener('pointerup',()=>drag=false);canvas.addEventListener('pointercancel',()=>drag=false);
+document.getElementById('reset').onclick=()=>{if(!photo)return;scale=1;x=0;y=0;zoom.value=1;draw();};document.getElementById('download').onclick=()=>{if(!photo){alert('اختر صورتك أولاً');return;}draw();canvas.toBlob(blob=>{let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='belnasli-profile.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)},'image/png');};draw();
+</script></body></html>
